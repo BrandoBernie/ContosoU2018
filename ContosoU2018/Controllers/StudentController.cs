@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using ContosoU2018.Data;
 using ContosoU2018.Models;
+using ContosoU2018.Models.SchoolViewModels;
 
 namespace ContosoU2018.Controllers
 {
@@ -159,6 +160,27 @@ namespace ContosoU2018.Controllers
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
+
+
+        //bbernard: Create the Stats report action
+        public async Task<IActionResult> Stats()
+        {
+            //Populate the EnrollmentDateGroup ViewModel with
+            //student statistics using LINQ (Language Integrated Query)
+            IQueryable<EnrollmentDateGroup> data =
+                from student in _context.Students //SQL FROM Clasuse:   FROM Students
+                group student by student.EnrollmentDate into dateGroup //GROUP BY Enrollment
+                select new EnrollmentDateGroup //SELECT EnrollmentDate, COUNT(*) AS StudentCount
+                {
+                    EnrollmentDate = dateGroup.Key,
+                    StudentCount = dateGroup.Count()
+                };
+
+
+            return View(await data.ToListAsync());
+        }
+
+
 
         private bool StudentExists(int id)
         {
